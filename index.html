@@ -688,6 +688,7 @@
         .profile-buttons .logout-btn { background: #f44336; }
         #update-profile-form { display: none; flex-direction: column; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee; }
         #update-profile-form input { padding: 0.75rem; border: 1px solid #e0e0e0; border-radius: 8px; }
+        #update-profile-form input[readonly] { background-color: #f0f0f0; color: #777; cursor: not-allowed; }
         #update-profile-form button { background: var(--secondary-color); color: white; padding: 0.75rem; border: none; border-radius: 50px; cursor: pointer; }
 
         /* Map */
@@ -1001,12 +1002,12 @@
                 <form class="checkout-form" id="checkout-form">
                     <label>Name:</label>
                     <input type="text" id="checkout-name" required>
-                    <label>Phone:</label>
+                    <label>Phone (Primary):</label>
                     <input type="text" id="checkout-phone" required>
+                    <label>Email (Primary):</label>
+                    <input type="email" id="checkout-email" required>
                     <label>Address:</label>
                     <input type="text" id="checkout-address" required>
-                    <label>Email:</label>
-                    <input type="email" id="checkout-email" required>
                     <button type="submit" class="checkout-btn">Place Order</button>
                 </form>
             </div>
@@ -1048,7 +1049,9 @@
             <form id="update-profile-form">
                 <label>Name:</label>
                 <input type="text" id="update-name" required>
-                <label>Phone:</label>
+                <label>Email (Primary):</label>
+                <input type="email" id="update-email" required>
+                <label>Phone (Primary):</label>
                 <input type="text" id="update-phone" required>
                 <label>Address:</label>
                 <input type="text" id="update-address" required>
@@ -1216,6 +1219,7 @@
             profileLogoutBtn: document.getElementById('profile-logout-btn'),
             updateProfileForm: document.getElementById('update-profile-form'),
             updateName: document.getElementById('update-name'),
+            updateEmail: document.getElementById('update-email'),
             updatePhone: document.getElementById('update-phone'),
             updateAddress: document.getElementById('update-address'),
             // Auth elements
@@ -1275,20 +1279,24 @@
             }
         });
 
-        // Check if user exists in DB, else create basic profile
+        // Check if user exists in DB, else create basic profile and SYNC email/phone
         async function ensureUserProfile(user) {
             const userRef = db.ref(`users/${user.uid}`);
             const snapshot = await userRef.once('value');
-            if (!snapshot.exists()) {
-                await userRef.set({
-                    name: user.displayName || ('User ' + (user.phoneNumber ? user.phoneNumber.slice(-4) : '')),
-                    email: user.email || '',
-                    phone: user.phoneNumber || '',
-                    lat: appState.currentLocation.lat || null,
-                    lng: appState.currentLocation.lng || null,
-                    address: ''
-                });
-            }
+            const currentData = snapshot.val() || {};
+            
+            // Prioritize DB data if it exists, otherwise use Auth data, otherwise empty string
+            const updates = {
+                name: currentData.name || user.displayName || ('User ' + (user.phoneNumber ? user.phoneNumber.slice(-4) : '')),
+                email: currentData.email || user.email || '',
+                phone: currentData.phone || user.phoneNumber || '',
+                lat: currentData.lat || appState.currentLocation.lat || null,
+                lng: currentData.lng || appState.currentLocation.lng || null,
+                address: currentData.address || ''
+            };
+            
+            // Only update if we have new data to add/sync
+            await userRef.update(updates);
         }
 
         auth.onAuthStateChanged(async user => {
@@ -1303,7 +1311,6 @@
                 db.ref(`users/${user.uid}`).once('value', snapshot => {
                     const profile = snapshot.val();
                     if (profile) {
-                        // elements.profileName.textContent = profile.name.split(' ')[0]; // If you have profileName element
                         updateLocationDisplay(profile.lat, profile.lng);
                     }
                 });
@@ -1675,13 +1682,23 @@
         async function loadUserProfileForCheckout() {
             if (!appState.currentUser) return;
             const snapshot = await db.ref(`users/${appState.currentUser.uid}`).once('value');
-            const profile = snapshot.val();
-            if (profile) {
-                elements.checkoutName.value = profile.name || '';
-                elements.checkoutPhone.value = profile.phone || '';
-                elements.checkoutAddress.value = profile.address || '';
-                elements.checkoutEmail.value = profile.email || '';
-            }
+            const profile = snapshot.val() || {};
+            
+            // Auto-fill priority: DB Profile -> Auth Provider -> Empty
+            const autoName = profile.name || appState.currentUser.displayName || '';
+            const autoPhone = profile.phone || appState.currentUser.phoneNumber || '';
+            const autoEmail = profile.email || appState.currentUser.email || '';
+            const autoAddress = profile.address || '';
+
+            elements.checkoutName.value = autoName;
+            elements.checkoutPhone.value = autoPhone;
+            elements.checkoutEmail.value = autoEmail;
+            elements.checkoutAddress.value = autoAddress;
+            
+            // Make Primary Keys Readonly if they are the login source
+            elements.checkoutEmail.readOnly = !!appState.currentUser.email;
+            elements.checkoutPhone.readOnly = !!appState.currentUser.phoneNumber && !appState.currentUser.email;
+
             renderCartView();
         }
 
@@ -2163,9 +2180,21 @@
                         <p><strong>Lat:</strong> ${profile.lat || 'N/A'}</p>
                         <p><strong>Lng:</strong> ${profile.lng || 'N/A'}</p>
                     `;
-                    elements.updateName.value = profile.name || '';
-                    elements.updatePhone.value = profile.phone || '';
-                    elements.updateAddress.value = profile.address || '';
+                    
+                    const autoName = profile.name || appState.currentUser.displayName || '';
+                    const autoEmail = profile.email || appState.currentUser.email || '';
+                    const autoPhone = profile.phone || appState.currentUser.phoneNumber || '';
+                    const autoAddress = profile.address || '';
+                    
+                    elements.updateName.value = autoName;
+                    elements.updateEmail.value = autoEmail;
+                    elements.updatePhone.value = autoPhone;
+                    elements.updateAddress.value = autoAddress;
+                    
+                    // Set ReadOnly based on Login Method
+                    if(appState.currentUser.email) elements.updateEmail.readOnly = true;
+                    if(appState.currentUser.phoneNumber) elements.updatePhone.readOnly = true;
+
                     appState.currentLocation.lat = profile.lat;
                     appState.currentLocation.lng = profile.lng;
                     updateLocationDisplay(profile.lat, profile.lng);
@@ -2191,9 +2220,10 @@
             showLoader();
             try {
                 const name = elements.updateName.value;
+                const email = elements.updateEmail.value;
                 const phone = elements.updatePhone.value;
                 const address = elements.updateAddress.value;
-                await db.ref(`users/${appState.currentUser.uid}`).update({ name, phone, address });
+                await db.ref(`users/${appState.currentUser.uid}`).update({ name, email, phone, address });
                 showToast('Profile updated successfully!');
                 loadProfile();
             } catch (error) {
