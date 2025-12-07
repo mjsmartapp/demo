@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>WimHub</title>
     <link rel="icon" type="image/png" href="https://i.postimg.cc/g2K6f9zN/wimhub-logo-removebg-preview.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
@@ -927,12 +930,11 @@
         .footer-btn.active, .footer-btn:hover { color: var(--secondary-color); }
         main { padding-bottom: 4rem; }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
     <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 </head>
 <body>
@@ -1602,9 +1604,10 @@
             } else {
                 card.querySelector('.add-to-cart-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
-                    // Track buyCount only on initial add
-                    db.ref(`popularProducts/${product.id}/buyCount`).transaction(count => (count || 0) + 1);
-                    addToCart({ ...product, category: appState.currentCategory || 'general', id: product.id });
+                    // NOTE: Use originalId for buyCount tracking to match DB schema, but unique ID for cart
+                    const trackingId = product.originalId || product.id;
+                    db.ref(`popularProducts/${trackingId}/buyCount`).transaction(count => (count || 0) + 1);
+                    addToCart({ ...product, category: appState.currentCategory || 'general' });
                 });
             }
             return card;
@@ -1916,7 +1919,9 @@
                 });
 
                 items.forEach(item => {
-                    db.ref(`popularProducts/${item.id}/buyCount`)
+                    // Use originalId if available to track stats correctly
+                    const trackId = item.originalId || item.id;
+                    db.ref(`popularProducts/${trackId}/buyCount`)
                         .transaction(count => (count || 0) + item.qty);
                 });
 
@@ -2146,6 +2151,7 @@
         });
 
         // Products View
+        // FIXED: Added composite ID generation logic to prevent ID collision across categories
         async function loadProducts(category = null) {
             showLoader();
             elements.productsGrid.innerHTML = '';
@@ -2160,8 +2166,14 @@
                 if (category) {
                     const categoryData = data[category] || null;
                     if (categoryData && typeof categoryData === 'object' && (categoryData.name === undefined)) {
-                        allProducts = Object.entries(categoryData).map(([key, val]) => ({ id: key, ...val }));
+                        // Nested, specific category
+                        allProducts = Object.entries(categoryData).map(([key, val]) => ({ 
+                            id: `${category}_${key}`, // Generate Composite ID
+                            originalId: key,
+                            ...val 
+                        }));
                     } else {
+                        // Flat or direct match
                         allProducts = Object.entries(data)
                             .filter(([k, v]) => v && v.category === category)
                             .map(([key, val]) => ({ id: key, ...val }));
@@ -2170,14 +2182,25 @@
                     const keys = Object.keys(data);
                     if (keys.length > 0) {
                         const firstVal = data[keys[0]];
-                        const looksLikeProduct = firstVal && (firstVal.name !== undefined || firstVal.price !== undefined || firstVal.unit !== undefined);
+                        // Simple heuristic to check if structure is flat or nested
+                        const looksLikeProduct = firstVal && (firstVal.name !== undefined || firstVal.price !== undefined);
+                        
                         if (looksLikeProduct) {
+                            // Flat structure
                             allProducts = Object.entries(data).map(([key, val]) => ({ id: key, ...val }));
                         } else {
+                            // Nested structure (Categories -> Products)
                             Object.entries(data).forEach(([catKey, catVal]) => {
                                 if (catVal && typeof catVal === 'object') {
                                     Object.entries(catVal).forEach(([prodKey, prodVal]) => {
-                                        allProducts.push({ id: prodKey, ...prodVal, category: catKey });
+                                        // FORCE UNIQUE ID by combining Category + Key
+                                        const uniqueId = `${catKey}_${prodKey}`;
+                                        allProducts.push({ 
+                                            id: uniqueId, 
+                                            originalId: prodKey, 
+                                            ...prodVal, 
+                                            category: catKey 
+                                        });
                                     });
                                 }
                             });
