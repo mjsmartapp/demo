@@ -636,6 +636,7 @@
 
         .checkout-form { display: grid; gap: 1rem; }
         .checkout-form input { padding: 0.75rem; border: 1px solid #e0e0e0; border-radius: 8px; }
+        .checkout-form input[readonly] { background-color: #f0f0f0; color: #777; cursor: not-allowed; }
         .checkout-form label { font-weight: 500; }
 
         /* Orders */
@@ -693,8 +694,16 @@
 
         /* Map */
         #map-view { text-align: center; }
-        #map-container { width: 100%; height: 400px; background-color: #e9ecef; border-radius: var(--border-radius); margin-top: 1.5rem; box-shadow: var(--soft-shadow); }
+        #map-container { width: 100%; height: 400px; background-color: #e9ecef; border-radius: var(--border-radius); margin-top: 1.5rem; box-shadow: var(--soft-shadow); position: relative;}
         #map-view .change-location-btn { margin-top: 1rem; background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); color: white; padding: 1rem; border: none; border-radius: 50px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
+        
+        #detect-location-btn {
+            background-color: white; color: var(--text-color); border: 1px solid #ccc;
+            padding: 0.75rem 1.5rem; border-radius: 50px; font-weight: 600; cursor: pointer;
+            margin-top: 1rem; margin-right: 1rem; box-shadow: var(--soft-shadow);
+            display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        #detect-location-btn:hover { background-color: #f9f9f9; }
 
         /* Modals */
         .modal-overlay {
@@ -1069,7 +1078,10 @@
         <h2 class="view-title">Choose Your Location</h2>
         <p>Drag the marker to your exact location. This will be used for delivery.</p>
         <div id="map-container"></div>
-        <button id="save-location-btn" class="change-location-btn">Save Location</button>
+        <div style="display:flex; justify-content:center; gap:1rem;">
+            <button id="detect-location-btn"><i class="fas fa-crosshairs"></i> Get Current Location</button>
+            <button id="save-location-btn" class="change-location-btn">Save Location</button>
+        </div>
     </section>
 </main>
     <div id="qrcode-temp-container" style="position:absolute;left:-9999px;top:-9999px;"></div>
@@ -1215,6 +1227,7 @@
             profileMapBtn: document.getElementById('profile-map-btn'),
             mapContainer: document.getElementById('map-container'),
             saveLocationBtn: document.getElementById('save-location-btn'),
+            detectLocationBtn: document.getElementById('detect-location-btn'),
             editProfileBtn: document.getElementById('edit-profile-btn'),
             profileLogoutBtn: document.getElementById('profile-logout-btn'),
             updateProfileForm: document.getElementById('update-profile-form'),
@@ -1761,7 +1774,16 @@
                     createdAt: firebase.database.ServerValue.TIMESTAMP
                 };
 
+                // 1. Save Order
                 await db.ref(`orders/${orderId}`).set(orderData);
+
+                // 2. NEW: Save Checkout Details to Profile
+                await db.ref(`users/${appState.currentUser.uid}`).update({
+                    name: customerName,
+                    address: address,
+                    phone: phone, // Will update unless logic prevents overwrite elsewhere, but beneficial for keeping latest contact info
+                    email: email
+                });
 
                 items.forEach(item => {
                     db.ref(`popularProducts/${item.id}/buyCount`)
@@ -2301,6 +2323,29 @@
             } else {
                  map.setView(locationToUse, 15);
             }
+        }
+
+        // Detect Location Button Logic
+        if (elements.detectLocationBtn) {
+            elements.detectLocationBtn.addEventListener('click', async () => {
+                showLoader();
+                try {
+                    const loc = await getCurrentLocation();
+                    if (loc.lat && loc.lng) {
+                        appState.currentLocation = loc;
+                        if (marker) marker.setLatLng([loc.lat, loc.lng]);
+                        if (map) map.setView([loc.lat, loc.lng], 15);
+                        showToast('Location updated!');
+                    } else {
+                        showToast('Could not fetch location.');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    showToast('Error fetching location.');
+                } finally {
+                    hideLoader();
+                }
+            });
         }
 
         function updateLocationDisplay(lat, lng) {
