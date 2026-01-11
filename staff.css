@@ -1,0 +1,140 @@
+/* --- Header View Color --- */
+.header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    padding: 20px 30px;
+    border-radius: 0 0 20px 20px;
+    margin-bottom: 30px;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.header h1 { color: #d4af37 !important; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+.menu-toggle { color: white !important; }
+
+/* --- Attendance Views Styles --- */
+
+/* History / All Attendance Layout */
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.history-title h2 { font-family: 'Cinzel', serif; color: #0f172a; font-size: 1.4rem; margin: 0; }
+.history-title p { color: #64748b; font-size: 0.9rem; margin-top: 5px; }
+
+.mark-new-btn {
+    background: #d4af37; color: #0f172a; border: none; padding: 10px 20px;
+    border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 4px 6px -1px rgba(212, 175, 55, 0.3); transition: 0.3s;
+}
+.mark-new-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(212, 175, 55, 0.4); }
+
+.history-list { display: flex; flex-direction: column; gap: 20px; }
+
+/* HISTORY CARD LAYOUT */
+.history-card {
+    background: white; padding: 20px; border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+    border-left: 5px solid #0f172a; cursor: pointer;
+    transition: all 0.2s;
+    display: flex; flex-direction: column; gap: 15px;
+}
+.history-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+
+.card-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+}
+.history-date { font-weight: 700; color: #0f172a; font-size: 1.2rem; }
+.history-meta { color: #64748b; font-size: 0.85rem; margin-top: 4px; }
+
+/* GRID FOR STATS */
+.history-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+}
+.stat-box {
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.sb-fd-pres { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.sb-fd-abs { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+.sb-ad-pres { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+.sb-ad-abs { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+
+/* Edit Button */
+.edit-history-btn {
+    background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: 0.2s; z-index: 2;
+}
+.edit-history-btn:hover { background: #0f172a; color: white; border-color: #0f172a; }
+
+/* --- Attendance Form Styles --- */
+.attendance-header {
+    display: flex; justify-content: space-between; align-items: center;
+    background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); flex-wrap: wrap; gap: 15px;
+}
+.attendance-info h2 { font-family: 'Cinzel', serif; color: #0f172a; margin: 0; font-size: 1.5rem; }
+.date-picker { padding: 10px 15px; border: 2px solid #e2e8f0; border-radius: 8px; font-family: 'Poppins', sans-serif; color: #0f172a; font-weight: 600; }
+
+/* --- BULK ACTIONS --- */
+.bulk-actions { display: flex; gap: 15px; margin-bottom: 15px; }
+.bulk-btn {
+    border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer;
+    font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: 0.2s;
+}
+.btn-all-present { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.btn-all-present:hover { background: #bbf7d0; }
+.btn-all-absent { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.btn-all-absent:hover { background: #fecaca; }
+
+/* --- CIRCLE BUTTON STYLES --- */
+.status-group { display: flex; gap: 8px; justify-content: center; }
+.circle-btn {
+    width: 32px; height: 32px; border-radius: 50%; border: 1px solid #e2e8f0;
+    background: white; color: #64748b; font-size: 0.75rem; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+}
+.circle-btn:hover { transform: scale(1.1); }
+
+.btn-present.active { background: #22c55e; color: white; border-color: #22c55e; box-shadow: 0 0 5px #22c55e80; }
+.btn-present:hover { border-color: #22c55e; color: #22c55e; }
+
+.btn-absent.active { background: #ef4444; color: white; border-color: #ef4444; box-shadow: 0 0 5px #ef444480; }
+.btn-absent:hover { border-color: #ef4444; color: #ef4444; }
+
+/* Table Specifics */
+.user-table th { text-align: center; }
+.user-table td { vertical-align: middle; }
+.center-cell { text-align: center; }
+
+.submit-attendance-btn {
+    background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+    color: white; border: none; padding: 15px 30px; border-radius: 10px;
+    font-weight: 600; font-size: 1rem; cursor: pointer; float: right;
+    margin-top: 20px; margin-bottom: 40px; display: flex; align-items: center; gap: 10px;
+    transition: transform 0.2s;
+}
+.submit-attendance-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+
+.remark-input { width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; font-family: 'Poppins', sans-serif; font-size: 0.9rem; }
+.remark-input:focus { outline: none; border-color: #d4af37; }
+
+/* --- VIEW MODAL --- */
+.modal-body-scroll { max-height: 70vh; overflow-y: auto; padding-right: 5px; }
+.view-table { width: 100%; border-collapse: collapse; }
+.view-table th { text-align: left; background: #f8fafc; color: #64748b; padding: 10px; font-size: 0.85rem; position: sticky; top: 0; }
+.view-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9rem; color: #333; }
+.status-pill { padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+.pill-present { background: #dcfce7; color: #166534; }
+.pill-absent { background: #fee2e2; color: #991b1b; }
+.pill-half { background: #fef3c7; color: #92400e; }

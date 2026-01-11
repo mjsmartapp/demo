@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSVMS | Principal Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+    <div id="loader-wrapper">
+        <div class="loader-content">
+            <h1 class="loader-text">SSVMS</h1>
+            <div class="loader-bar"><div class="loader-progress"></div></div>
+            <p class="loader-tagline">Excellence in Education</p>
+        </div>
+    </div>
+
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="logo">SSVMS PRINCIPAL</div>
+        
+        <div class="menu-item active">
+            <i class="fas fa-th-large"></i> Dashboard
+        </div>
+        <div class="menu-item">
+            <i class="fas fa-chalkboard-teacher"></i> Staff Report
+        </div>
+        <div class="menu-item">
+            <i class="fas fa-user-graduate"></i> Students
+        </div>
+        <div class="menu-item">
+            <i class="fas fa-cog"></i> Settings
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="header-left">
+                <i class="fas fa-bars menu-toggle" onclick="toggleSidebar()"></i>
+                <h1>Principal Overview</h1>
+            </div>
+            <div class="user-profile">
+                <button onclick="handleLogout()" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> <span class="desktop-text">Logout</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="card welcome-card">
+            <div class="welcome-text">
+                <h2 id="welcome-msg">Welcome, Principal</h2>
+                <p>Monitor school performance and staff activities.</p>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card" style="border-left: 4px solid #1e88e5;">
+                <div class="icon-box" style="background:#e3f2fd; color:#1e88e5;"><i class="fas fa-clipboard-list"></i></div>
+                <div class="stat-info">
+                    <h3>Reports</h3>
+                    <p class="count">Pending</p>
+                    <span class="sub-text">View daily reports</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', () => {
+            const userName = localStorage.getItem('ssvms_user');
+            const userRole = localStorage.getItem('ssvms_role');
+
+            // Session Security
+            if (!userName || userRole !== 'principal') {
+                // If user is logged in but as admin, allow access or redirect? 
+                // Strict check:
+                if(userRole !== 'principal' && userRole !== 'admin') {
+                     window.location.href = 'index.html';
+                }
+            }
+
+            // Set Name
+            if(userName) {
+                document.getElementById('welcome-msg').innerHTML = `Welcome, <span style="text-transform: capitalize;">${userName}</span>`;
+            }
+
+            // Remove Loader
+            setTimeout(() => {
+                const loader = document.getElementById('loader-wrapper');
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+            }, 800);
+        });
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.querySelector('.overlay').classList.toggle('active');
+        }
+
+        function handleLogout() {
+            if(confirm("Logout?")) {
+                localStorage.clear();
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>

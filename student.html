@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSVMS | Student Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="student.css">
+</head>
+<body>
+
+    <div id="loader-wrapper">
+        <div class="loader-content">
+            <h1 class="loader-text">SSVMS</h1>
+            <div class="loader-bar"><div class="loader-progress"></div></div>
+            <p class="loader-tagline">Excellence in Education</p>
+        </div>
+    </div>
+
+    <div id="profile-select-modal" class="modal-overlay" style="display:none; z-index:10001; backdrop-filter: blur(5px);">
+        <div class="modal-content profile-select-content">
+            <div class="profile-select-header">
+                <h2>Select Profile</h2>
+                <p>Multiple students found with this contact info.</p>
+            </div>
+            <div id="profile-list" class="profile-grid"></div>
+        </div>
+    </div>
+
+    <div class="overlay" onclick="window.toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="logo">SSVMS STUDENT</div>
+        <div class="menu-item active" id="nav-dashboard" onclick="window.switchView('dashboard-view')">
+            <i class="fas fa-th-large"></i> Dashboard
+        </div>
+        <div class="menu-item"><i class="fas fa-book-reader"></i> My Classes</div>
+        <div class="menu-item" id="nav-attendance" onclick="window.switchView('attendance-view')">
+            <i class="fas fa-chart-pie"></i> Attendance
+        </div>
+        <div class="menu-item" id="nav-profile" onclick="window.switchView('profile-view')">
+            <i class="fas fa-user"></i> Profile
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="header-left">
+                <i class="fas fa-bars menu-toggle" onclick="window.toggleSidebar()"></i>
+                <h1>Student Portal</h1>
+            </div>
+            <div class="user-profile">
+                <button onclick="window.handleLogout()" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> <span class="desktop-text">Logout</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="dashboard-view" class="view-section active">
+            <div class="card welcome-card">
+                <div class="welcome-text">
+                    <h2 id="welcome-msg">Welcome, Student</h2>
+                    <p>Track your academic progress and upcoming classes.</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card" style="border-left: 4px solid #8e24aa; cursor: pointer;" onclick="window.switchView('attendance-view')">
+                    <div class="icon-box" style="background:#f3e5f5; color:#8e24aa;"><i class="fas fa-chart-pie"></i></div>
+                    <div class="stat-info">
+                        <h3>Attendance</h3>
+                        <p class="count" id="dash-att-pct">--%</p>
+                        <span class="sub-text">Click for Details</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card" style="border-left: 4px solid #009688;">
+                    <div class="icon-box" style="background:#e0f2f1; color:#009688;"><i class="fas fa-user-tag"></i></div>
+                    <div class="stat-info">
+                        <h3>Class</h3>
+                        <p class="count" id="dash-class-sec">-</p>
+                        <span class="sub-text">Current Standard</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="attendance-view" class="view-section" style="display: none;">
+            <div class="list-header-box" style="margin-bottom: 20px;">
+                <div class="list-title-group">
+                    <button class="icon-btn" onclick="window.switchView('dashboard-view')"><i class="fas fa-arrow-left"></i></button>
+                    <h2>Attendance Overview</h2>
+                </div>
+            </div>
+
+            <div class="att-stats-grid">
+                <div class="att-card bc-blue">
+                    <h3>Total Working Days</h3>
+                    <div class="value" id="att-total-days">0</div>
+                    <div class="sub" style="color:#3b82f6;">Days Open</div>
+                </div>
+
+                <div class="att-card bc-green">
+                    <h3>Total Present</h3>
+                    <div class="value" id="att-total-present">0</div>
+                    <div class="sub" style="color:#22c55e;">Days Attended</div>
+                </div>
+
+                <div class="att-card bc-red">
+                    <h3>Total Absent</h3>
+                    <div class="value" id="att-total-absent">0</div>
+                    <div class="sub" style="color:#ef4444;">Days Missed</div>
+                </div>
+
+                <div class="att-card bc-gold">
+                    <h3>Overall Performance</h3>
+                    <div class="value" id="att-percentage">0%</div>
+                    <div class="sub" id="att-status-text">CALCULATING...</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="profile-view" class="view-section" style="display: none;">
+            <div class="list-header-box" style="margin-bottom: 20px;">
+                <div class="list-title-group">
+                    <button class="icon-btn" onclick="window.switchView('dashboard-view')"><i class="fas fa-arrow-left"></i></button>
+                    <h2>My Profile</h2>
+                </div>
+            </div>
+
+            <div class="profile-container">
+                <div class="profile-header-card">
+                    <div class="big-avatar"><i class="fas fa-user-graduate"></i></div>
+                    <h2 id="prof-name">Loading Name...</h2>
+                    <p id="prof-role">Student</p>
+                </div>
+
+                <div class="profile-details-card">
+                    <h3>Personal Information</h3>
+                    <div class="details-grid">
+                        <div class="detail-box">
+                            <label>Student ID</label>
+                            <div id="prof-custom-id">--</div>
+                        </div>
+                        <div class="detail-box">
+                            <label>Class & Section</label>
+                            <div id="prof-class-sec">--</div>
+                        </div>
+                        <div class="detail-box">
+                            <label>Date of Birth</label>
+                            <div id="prof-dob">--</div>
+                        </div>
+                        <div class="detail-box">
+                            <label>Phone Number</label>
+                            <div id="prof-phone">--</div>
+                        </div>
+                        <div class="detail-box">
+                            <label>Email Address</label>
+                            <div id="prof-email">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module" src="student.js"></script>
+</body>
+</html>
