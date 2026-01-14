@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSVMS Portal | Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div id="loader-wrapper">
+        <div class="loader-content">
+            <h1 class="loader-text">SSVMS</h1>
+            <div class="loader-bar">
+                <div class="loader-progress"></div>
+            </div>
+            <p class="loader-tagline">Excellence in Education</p>
+        </div>
+    </div>
+
+    <div id="profile-select-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content profile-select-content">
+            <div class="profile-select-header">
+                <h2>Select Student</h2>
+                <p>Multiple profiles found. Who is logging in?</p>
+            </div>
+            <div id="profile-list" class="profile-grid">
+                </div>
+            <button class="close-modal-btn" id="closeModalBtn">Cancel</button>
+        </div>
+    </div>
+
+    <div class="bg-overlay"></div>
+
+    <div class="container">
+        <div class="form-header">
+            <div class="school-logo">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h2>Staff & Student Portal</h2>
+            <p>Secure Login</p>
+        </div>
+
+        <div id="login-form" class="form-box">
+            <div class="input-group">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" id="loginId" placeholder="Email or Phone No">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-calendar-alt input-icon"></i>
+                <input type="date" id="loginDob" placeholder="Date of Birth">
+            </div>
+            <button id="btnLogin" class="submit-btn">
+                <span>Sign In</span> <i class="fas fa-arrow-right"></i>
+            </button>
+            <p class="error-msg" id="loginError"></p>
+        </div>
+    </div>
+
+    <script type="module" src="index.js"></script>
+
+</body>
+</html>

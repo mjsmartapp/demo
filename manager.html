@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSVMS | Manager Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="manager.css">
+</head>
+<body>
+
+    <div id="loader-wrapper">
+        <div class="loader-content">
+            <h1 class="loader-text">SSVMS</h1>
+            <div class="loader-bar"><div class="loader-progress"></div></div>
+            <p class="loader-tagline">Excellence in Education</p>
+        </div>
+    </div>
+
+    <div class="overlay" onclick="window.toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="logo">SSVMS MANAGER</div>
+        
+        <div class="menu-item active" id="nav-dashboard" onclick="window.switchView('dashboard-view')">
+            <i class="fas fa-th-large"></i> Dashboard
+        </div>
+        
+        <div class="menu-item" id="nav-accounts" onclick="window.switchView('accounts-view')">
+            <i class="fas fa-file-invoice-dollar"></i> Accounts
+        </div>
+        
+        <div class="menu-item"><i class="fas fa-boxes"></i> Inventory</div>
+        <div class="menu-item"><i class="fas fa-cog"></i> Settings</div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="header-left">
+                <i class="fas fa-bars menu-toggle" onclick="window.toggleSidebar()"></i>
+                <h1 id="page-title">Manager Overview</h1>
+            </div>
+            <div class="user-profile">
+                <button onclick="window.handleLogout()" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> <span class="desktop-text">Logout</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="dashboard-view" class="view-section active">
+            <div class="card welcome-card">
+                <div class="welcome-text">
+                    <h2 id="welcome-msg">Welcome, Manager</h2>
+                    <p>Here is the summary of today's financial activities.</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card" style="border-left: 4px solid #43a047;">
+                    <div class="icon-box" style="background:#e8f5e9; color:#43a047;"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info">
+                        <h3>System Status</h3>
+                        <p class="count">Active</p>
+                        <span class="sub-text">Operational</span>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="border-left: 4px solid #f57c00;">
+                    <div class="icon-box" style="background:#fff3e0; color:#f57c00;"><i class="fas fa-receipt"></i></div>
+                    <div class="stat-info">
+                        <h3>Today's Transactions</h3>
+                        <p class="count" id="today-tx-count">Loading...</p>
+                        <span class="sub-text">Total Payments Received</span>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="border-left: 4px solid #1976d2;">
+                    <div class="icon-box" style="background:#e3f2fd; color:#1976d2;"><i class="fas fa-rupee-sign"></i></div>
+                    <div class="stat-info">
+                        <h3>Today's Collection</h3>
+                        <p class="count" id="today-tx-amount">Loading...</p>
+                        <span class="sub-text">Total Amount Received</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="accounts-view" class="view-section" style="display: none;">
+            <div class="list-header-box">
+                <div class="list-title-group">
+                    <button class="icon-btn" onclick="window.switchView('dashboard-view')"><i class="fas fa-arrow-left"></i></button>
+                    <h2>Accounts: Select Class</h2>
+                </div>
+            </div>
+            
+            <div class="class-grid" id="classGridContainer"></div>
+        </div>
+
+        <div id="accounts-section-view" class="view-section" style="display: none;">
+            <div class="list-header-box">
+                <div class="list-title-group">
+                    <button class="icon-btn" onclick="window.switchView('accounts-view')"><i class="fas fa-arrow-left"></i></button>
+                    <h2 id="section-view-title">Class X - Select Section</h2>
+                </div>
+            </div>
+            
+            <div class="section-grid" id="sectionGridContainer"></div>
+        </div>
+
+        <div id="accounts-list-view" class="view-section" style="display: none;">
+            <div class="list-header-box">
+                <div class="list-title-group">
+                    <button class="icon-btn" onclick="window.switchView('accounts-section-view')"><i class="fas fa-arrow-left"></i></button>
+                    <h2 id="list-view-title">Student List</h2>
+                </div>
+                <div class="header-actions">
+                    <button class="add-new-btn" onclick="window.openAddPaymentModal()">
+                        <i class="fas fa-plus-circle"></i> New Payment
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Academic Bal</th>
+                            <th>Van Bal</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountTableBody"></tbody>
+                </table>
+                <p id="table-loading" style="text-align:center; padding:20px; display:none;">Loading student data...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="addPaymentModal" class="modal-overlay" style="display: none; z-index: 2500;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Record New Payment</h3>
+                <button class="close-modal" onclick="document.getElementById('addPaymentModal').style.display='none'">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>Select Student (Type Name or ID)</label>
+                    <input type="text" id="payStudentSearch" list="payStudentList" placeholder="Search in this section..." onchange="window.handlePaymentStudentChange()" autocomplete="off">
+                    <datalist id="payStudentList"></datalist>
+                </div>
+
+                <div class="flex-row">
+                    <div class="input-group">
+                        <label>Class</label>
+                        <input type="text" id="payStudentClass" readonly style="background:#f9fafb; border-color:#e5e7eb;">
+                    </div>
+                    <div class="input-group">
+                        <label>Section</label>
+                        <input type="text" id="payStudentSection" readonly style="background:#f9fafb; border-color:#e5e7eb;">
+                    </div>
+                    <div class="input-group">
+                        <label>Phone</label>
+                        <input type="text" id="payStudentPhone" readonly style="background:#f9fafb; border-color:#e5e7eb;">
+                    </div>
+                </div>
+
+                <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #ccc;">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <div class="input-group">
+                            <label style="color: #f57c00; font-weight:bold;">Academic Balance</label>
+                            <input type="text" id="payAcademicBal" readonly style="background:#fff3e0; color:#e65100; font-weight:bold;">
+                        </div>
+                        <div class="input-group">
+                            <label>Pay Amount (₹)</label>
+                            <input type="number" id="payAcademicInput" placeholder="0" min="0">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex-row" style="gap: 10px;">
+                            <div class="input-group" style="flex: 1;">
+                                <label style="font-size:0.8rem;">Per Month</label>
+                                <input type="text" id="payVanMonthly" readonly style="background:#f9fafb; font-size:0.9rem;">
+                            </div>
+                            <div class="input-group" style="flex: 1.5;">
+                                <label style="color: #1976d2; font-weight:bold; font-size:0.8rem;">Total Van Balance</label>
+                                <input type="text" id="payVanBal" readonly style="background:#e3f2fd; color:#0d47a1; font-weight:bold;">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Pay Amount (₹)</label>
+                            <input type="number" id="payVanInput" placeholder="0" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <button id="submitPaymentBtn" class="save-btn" onclick="window.processPayment()">Submit Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="historyModal" class="modal-overlay" style="display: none; z-index: 2600;">
+        <div class="modal-content" style="max-width: 800px; width: 90%;">
+            <div class="modal-header" style="border-bottom: none; padding-bottom: 5px;">
+                <h3>Payment History</h3>
+                <button class="close-modal" onclick="document.getElementById('historyModal').style.display='none'">&times;</button>
+            </div>
+            
+            <div class="history-student-header">
+                <h2 id="hist-student-name">Student Name</h2>
+                <p id="hist-student-id">STSSXXXXXX</p>
+            </div>
+
+            <div class="history-controls">
+                <input type="date" id="historyDateSearch" onchange="window.filterHistory()" placeholder="Filter by Date">
+            </div>
+
+            <div class="modal-body" style="padding: 0;">
+                <div style="overflow-x: auto; max-height: 400px;">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date/Time</th>
+                                <th style="color:#166534;">Academic Fee</th>
+                                <th style="color:#c2410c;">Academic Bal</th>
+                                <th style="color:#1e40af;">Van Fee</th>
+                                <th style="color:#c2410c;">Van Bal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody"></tbody>
+                    </table>
+                </div>
+                <div style="padding: 15px; text-align: right;">
+                    <button class="popup-btn btn-primary" onclick="document.getElementById('historyModal').style.display='none'">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-bottom-nav">
+        <div class="mobile-nav-item active" id="mob-nav-dashboard" onclick="window.switchView('dashboard-view')">
+            <i class="fas fa-th-large"></i>
+            <span>Home</span>
+        </div>
+        <div class="mobile-nav-item" id="mob-nav-accounts" onclick="window.switchView('accounts-view')">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Accounts</span>
+        </div>
+        <div class="mobile-nav-item">
+            <i class="fas fa-boxes"></i>
+            <span>Inventory</span>
+        </div>
+        <div class="mobile-nav-item">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+        </div>
+    </div>
+
+    <div id="custom-alert-modal" class="modal-overlay" style="display: none; z-index: 3000;">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; border-bottom: none; padding-bottom: 0;">
+                <h3 id="custom-alert-title" style="font-size: 1.5rem; margin: 0; color: #0f172a;">Notification</h3>
+            </div>
+            <div class="modal-body" style="padding-top: 10px;">
+                <p id="custom-alert-msg" style="margin-bottom: 25px; font-size: 1rem; color: #555; line-height: 1.5;"></p>
+                <button id="custom-alert-ok-btn" class="popup-btn btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-confirm-modal" class="modal-overlay" style="display: none; z-index: 3000;">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; border-bottom: none; padding-bottom: 0;">
+                <h3 id="custom-confirm-title" style="font-size: 1.5rem; margin: 0; color: #0f172a;">Confirm Action</h3>
+            </div>
+            <div class="modal-body" style="padding-top: 10px;">
+                <p id="custom-confirm-msg" style="margin-bottom: 25px; font-size: 1rem; color: #555; line-height: 1.5;"></p>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button id="custom-confirm-cancel-btn" class="popup-btn btn-danger">Cancel</button>
+                    <button id="custom-confirm-yes-btn" class="popup-btn btn-primary">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="manager.js"></script>
+</body>
+</html>
